@@ -17,6 +17,16 @@ function Home() {
   
     
    </div>
+   <div>
+
+   <div style={{ backgroundColor: 'black', color: 'white', textAlign: 'center', padding: '10px' }}>
+        &copy; {new Date().getFullYear()} Your Company Name. All rights reserved.
+      </div>
+
+
+
+
+      </div>
     
 
     </>
