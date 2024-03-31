@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const z = require('zod')
 const dotenv =require('dotenv');
 
 dotenv.config({path:'./config.env'})
@@ -19,28 +18,30 @@ mongoose.connect(DB)
 const userSchema=new mongoose.Schema({
     email:{type:String,
         required:true,
-        unique:true
+        unique:true,
+        trim:true
     },
-    name:{
+    username:{
         type:String,
         required:true,
+        unique:true,
+        minLength:3,
+        maxLength:30,
+        trim:true
     },
     phoneNo:{
         type:Number,
         required:true,
-        maxlength:10,
-        minlength:10,
+        max:9999999999
     },
     password:{
         type:String,
         required:true,
-        minlength:8,
-        confirmed:{
-            type:Boolean,
-            defaultValue:false
-        }
-    },
-    courses:[{type:mongoose.Schema.Types.ObjectId,ref:'courses'}]
+        minLength:6,
+        trim:true
+      
+    }
+   
 })
 
 
@@ -58,11 +59,20 @@ const adminSchema = new mongoose.Schema({
 })
 
 const coursesSchema = new mongoose.Schema({
-    title:String,
+    title:{
+        type:String,
+    },
+    instructor:{
+       type:String,
+       required:true
+    },
     description:String,
     price:Number,
     imagelink:String,
-    published:Boolean
+    published:{
+        type:Boolean,
+        defaultValue:false
+    }
 })
 
 const User =mongoose.model('User',userSchema,);
