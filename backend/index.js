@@ -4,15 +4,10 @@ const jwt = require('jsonwebtoken')
 const {User,Admin,Courses } = require('./mongodb')
 const cors = require('cors')
 
-
-
-
-
 app.use(cors());
 app.use(express.json());
 
-
-const SECRET = 'Kishi3434';
+const SECRET = process.env.SECRET;
 
 const authenticateJwt = (req,res,next)=>{
   const authHeader = req.headers.authorization;
@@ -32,10 +27,13 @@ const authenticateJwt = (req,res,next)=>{
   }
 }
 
+
+
+
 app.post('/admin/signup',(req,res)=>{
 try {
-  const {email,password}=req.body;
-  function callback(admin){
+    const {email,password}=req.body;
+    function callback(admin){
     if(admin){
       res.status(403).json({message:'Admin alredy exists'})
     }
@@ -56,15 +54,21 @@ catch (err) {
 });
 
 
+
+
+
 app.post('/admin/login',async (req,res)=>{
   try{
-  const {email,password}=req.headers;
-  const admin = await Admin.findOne({email,password});
-  if(admin){
-    const token =jwt.sign({email,password},SECRET,);
-    res.json({message:"Login successfully",token})
+  const {email,password}=req.body;
+  const admin = await Admin.findOne({email});
+  if(!admin){
+    return res.status(400).json({message:'invalid email or password'})
   }
-  res.status.json({message:'invalid email or password'});
+  const passwordverify = (password === admin.password);
+  if(passwordverify){
+    const token = jwt.sign({email,password},SECRET);
+    return res.status(200).json({message:'login sucessfully',token})
+  }
 }
 catch(err){
   console.log(err);
@@ -73,20 +77,23 @@ catch(err){
 })
 
 
+
+
+
 app.post('/user/signup', async (req,res)=>{
   try{
-const {email,username,phoneNo,password} = req.body;
-const user = await User.findOne({email})
-  if(user){
-    res.status(403).json({message:'user is already existed'})
-  }
+   const {email,username,phoneNo,password} = req.body;
+   const user = await User.findOne({email})
+   if(user){
+     res.status(403).json({message:'user is already existed'})
+    }
   else{
-  const obj = {email:email,username:username,phoneNo:phoneNo,password:password};
-  const newUser = new User(obj)
-  await newUser.save();
-  const token = jwt.sign({email,password},SECRET);
-  res.status(200).json({message:'User created sucessfully',token})
-}
+      const obj = {email:email,username:username,phoneNo:phoneNo,password:password};
+      const newUser = new User(obj)
+      await newUser.save();
+      const token = jwt.sign({email,password},SECRET);
+      res.status(200).json({message:'User created sucessfully',token})
+     }
   }
   catch (error){
     console.log(error)
@@ -95,20 +102,32 @@ const user = await User.findOne({email})
 });
 
 
+
+
+
+
 app.post('/user/login',async (req,res)=>{
   try {
-   const {email,password} = req.headers;
+   const {email,password} = req.body;
    const user = await User.findOne({email});
-   if(user){
+   const passwordMatch = (password === user.password)
+   if(!user){
+     return res.status(403).json({ message: 'Invalid email or password' });
+    }
+   if (passwordMatch) {
      const token = jwt.sign({email,password},SECRET)
-     res.status(200).json({message:'login sucessfully',token})
-     }
-   res.status(403).json({message:'email or password invalid'})
- }
- catch (error) {
+     return res.status(200).json({message:'login sucessfully',token})
+   }
+     res.status(400).json({message:'Invalid email or password'});
+  }
+  catch (error) {
   console.log(error);
   res.status(400).json({message:'internal server error'})
 }});
+
+
+
+
 
 
 
@@ -121,6 +140,8 @@ app.get('/admins', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 
 
 app.get('/home',authenticateJwt, async(req,res)=>{
@@ -136,6 +157,9 @@ catch (err){
 }
 })
 
+
+
+
 app.post('/course/dumping',authenticateJwt,async(req,res)=>{
   try{
   const {title,instructor,description,price,imagelink} = req.body;
@@ -147,6 +171,8 @@ app.post('/course/dumping',authenticateJwt,async(req,res)=>{
     imagelink:imagelink
   }
   
+
+
   const newCourses = new Courses(obj);
   await newCourses.save()
   res.status(200).json({message:'course posted sucessfully '})
@@ -156,6 +182,9 @@ app.post('/course/dumping',authenticateJwt,async(req,res)=>{
   }
 
 })
+
+
+
 
 
 

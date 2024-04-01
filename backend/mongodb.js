@@ -60,7 +60,8 @@ const adminSchema = new mongoose.Schema({
 
 const coursesSchema = new mongoose.Schema({
     title:{
-        type:String,
+        type:String
+
     },
     instructor:{
        type:String,
